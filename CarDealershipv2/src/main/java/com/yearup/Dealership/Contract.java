@@ -9,6 +9,7 @@ public abstract class Contract {
     private double contractMonthlyPayment;
 
     public abstract double getTotalPrice();
+    public abstract String encodedString();
     public abstract double getContractMonthlyPayment();
 
     public Contract(String contractDate, String contractCustomerName, String getContractCustomerEmail, int vehicleSold) {

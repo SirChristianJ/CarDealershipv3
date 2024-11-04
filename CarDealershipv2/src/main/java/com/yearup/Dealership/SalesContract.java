@@ -9,6 +9,7 @@ public class SalesContract extends Contract {
     private double contractDownPayment;
     private Dealership dealership;
     private Vehicle vehicle;
+    private double monthlyPayment;
 
 
     public SalesContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, int vehicleSold, boolean wantsToFinance, double contractDownPayment, Dealership dealership) {
@@ -25,6 +26,12 @@ public class SalesContract extends Contract {
             contractProcessingFee = 295;
             contractLoanTerm = 24;
         }
+    }
+
+    public SalesContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, int vehicleSold, Vehicle vehicle, double appliedTax, double contractRecordingFee, double contractProcessingFee, double totalPrice, boolean wantsToFinance, double monthlyPayment){
+        super(contractDate,contractCustomerName,getContractCustomerEmail,vehicleSold);
+        this.vehicle = vehicle;
+        this.monthlyPayment = getContractMonthlyPayment();
     }
 
     public double getContractProcessingFee() {
@@ -108,6 +115,10 @@ public class SalesContract extends Contract {
                 "\nThe total price: " + String.format("$%.2f", getTotalPrice());
 
        return output;
+    }
+    @Override
+    public String encodedString(){
+        return "SALE|" + super.getContractDate() + "|" + super.getContractCustomerName() + "|" + super.getGetContractCustomerEmail() + "|" + vehicle.toString() + "|" + vehicle.getPrice() * salesTax + "|" + contractRecordingFee + "|" + String.format("%.2f",getContractProcessingFee()) + "|" + String.format("%.2f",getTotalPrice()) + "|" + isWantsToFinance() + "|" + String.format("%.2f",getContractMonthlyPayment()) + "\n";
     }
 
 }

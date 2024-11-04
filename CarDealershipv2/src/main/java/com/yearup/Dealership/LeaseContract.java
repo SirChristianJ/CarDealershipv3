@@ -4,6 +4,7 @@ package com.yearup.Dealership;
 public class LeaseContract extends Contract{
     private static final double leaseFeeRate = 0.07;
     private static final double expectedEndingValue = 0.50;
+    //expectedDepreciationPct
     private static final int leaseTerm = 36;
     private static final double interestRate = 0.04;
     private double leaseFee;
@@ -29,6 +30,10 @@ public class LeaseContract extends Contract{
     }
     public double getResidualValue() {
         return residualValue;
+    }
+
+    public double getLeaseFee() {
+        return leaseFee;
     }
 
     public int getLeaseTerm() {
@@ -76,6 +81,11 @@ public class LeaseContract extends Contract{
                 "\nThe total price: " + String.format("$%.2f", getTotalPrice());
 
         return output;
+    }
+    @Override
+    public String encodedString(){
+        return "Lease|" + super.getContractDate() + "|" + super.getContractCustomerName() + "|" + super.getGetContractCustomerEmail() + "|" + vehicle.toString() +
+                "|" + String.format("%.2f",getResidualValue()) + "|" + String.format("%.2f",getLeaseFee()) + "|" + String.format("%.2f",getTotalPrice()) + "|" + String.format("%.2f",getContractMonthlyPayment());
     }
 
 
