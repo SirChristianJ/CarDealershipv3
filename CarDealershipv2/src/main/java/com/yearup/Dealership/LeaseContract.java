@@ -22,7 +22,7 @@ public class LeaseContract extends Contract{
         this.residualValue = expectedEndingValue * vehicle.getPrice();
         this.capCost = vehicle.getPrice();
         this.depreciation = (capCost - residualValue)/leaseTerm;
-        this.financeFee = (capCost + residualValue) * (interestRate*100/2400);
+        this.financeFee = (capCost + residualValue) * ((interestRate*100)/2400);
     }
 
     public LeaseContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, int vehicleSold,Vehicle vehicle,double residualValue, double leaseFee) {
