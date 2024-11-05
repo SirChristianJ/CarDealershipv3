@@ -17,16 +17,17 @@ public class ContractDataManager {
             while ((input=bfr.readLine()) != null){
                 String[] dataCategory = input.split("\\|");
                 if(dataCategory[0].equalsIgnoreCase("sale")){
-                    contracts.add(new SalesContract(dataCategory[1],dataCategory[2],dataCategory[3],Integer.parseInt(dataCategory[4]), dealership.getVehiclesByVin(Integer.parseInt(dataCategory[4])),
-                            Double.parseDouble(dataCategory[12]),Double.parseDouble(dataCategory[13]),Double.parseDouble(dataCategory[14]),
-                            Double.parseDouble(dataCategory[15]),Boolean.getBoolean(dataCategory[16]), Double.parseDouble(dataCategory[17])));
+                    contracts.add(new SalesContract(dataCategory[1],dataCategory[2],dataCategory[3],Integer.parseInt(dataCategory[4]),
+                            new Vehicle(Integer.parseInt(dataCategory[4]),
+                            Integer.parseInt(dataCategory[5]),dataCategory[6],dataCategory[7],dataCategory[8],dataCategory[9],Integer.parseInt(dataCategory[10]),Double.parseDouble(dataCategory[11])),
+                            Double.parseDouble(dataCategory[12]), Double.parseDouble(dataCategory[13]),Double.parseDouble(dataCategory[14]),Boolean.parseBoolean(dataCategory[15])));
                 }
 
-               /* else {
+               else {
                     contracts.add(new LeaseContract(dataCategory[1],dataCategory[2],dataCategory[3],Integer.parseInt(dataCategory[4]),
-                            Double.parseDouble(dataCategory[12]),Double.parseDouble(dataCategory[13]),Double.parseDouble(dataCategory[14]),
-                            Double.parseDouble(dataCategory[15]),Boolean.getBoolean(dataCategory[16]), Double.parseDouble(dataCategory[17])));
-                }*/
+                            new Vehicle(Integer.parseInt(dataCategory[4]),Integer.parseInt(dataCategory[5]),dataCategory[6],
+                            dataCategory[7],dataCategory[8], dataCategory[9], Integer.parseInt(dataCategory[9]), Double.parseDouble(dataCategory[10])), Double.parseDouble(dataCategory[11]), Double.parseDouble(dataCategory[12])));
+                }
             }
 
         } catch (IOException e) {

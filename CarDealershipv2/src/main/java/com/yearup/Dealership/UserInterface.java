@@ -197,7 +197,7 @@ public class UserInterface {
         double downpayment = 0;
         if(isDownpayment)
             downpayment = Console.PromptForDouble("Enter down payment amount: ");*/
-        LeaseContract leaseContract = new LeaseContract(contractDate,customerName,customerEmail,vin,dealership);
+        LeaseContract leaseContract = new LeaseContract(contractDate,customerName,customerEmail,vin, dealership);
         ContractDataManager.addContract(leaseContract);
         ContractDataManager.saveContracts();
         return leaseContract;

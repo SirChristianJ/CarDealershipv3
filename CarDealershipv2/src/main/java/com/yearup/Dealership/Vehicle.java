@@ -56,6 +56,10 @@ public class Vehicle {
     public String toEncodedString() {
         return String.format("%d|%d|%s|%s\n",vin,year,make,model);
     }
+    public String toContractString() {
+        return String.format("%d|%d|%s|%s|%s|%s|%d|%.2f",vin,year,make,model,vehicleType,color,odometer,price);
+    }
+
 
 
 }

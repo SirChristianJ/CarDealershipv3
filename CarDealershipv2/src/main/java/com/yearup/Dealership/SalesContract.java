@@ -1,22 +1,23 @@
 package com.yearup.Dealership;
 
 public class SalesContract extends Contract {
-    private static final double contractRecordingFee = 100;
-    private static final double salesTax = 0.05;
+    private double contractRecordingFee;
+    private static final double salesTaxPercentage = 0.05;
+    private double salesTaxAmountApplied;
     private double contractProcessingFee;
     private boolean wantsToFinance;
     private int contractLoanTerm;
     private double contractDownPayment;
     private Dealership dealership;
     private Vehicle vehicle;
-    private double monthlyPayment;
-
 
     public SalesContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, int vehicleSold, boolean wantsToFinance, double contractDownPayment, Dealership dealership) {
         super(contractDate, contractCustomerName, getContractCustomerEmail, vehicleSold);
         this.wantsToFinance = wantsToFinance;
         this.contractDownPayment = contractDownPayment;
+        this.contractRecordingFee = 100;
         this.dealership = dealership;
+        this.salesTaxAmountApplied = dealership.getVehiclesByVin(vehicleSold).getPrice() * salesTaxPercentage;
         this.vehicle = dealership.getVehiclesByVin(vehicleSold);
         if(vehicle.getPrice() >= 10000){
             contractProcessingFee = 495;
@@ -28,10 +29,18 @@ public class SalesContract extends Contract {
         }
     }
 
-    public SalesContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, int vehicleSold, Vehicle vehicle, double appliedTax, double contractRecordingFee, double contractProcessingFee, double totalPrice, boolean wantsToFinance, double monthlyPayment){
-        super(contractDate,contractCustomerName,getContractCustomerEmail,vehicleSold);
+    public SalesContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, int vehicleSold, Vehicle vehicle, double salesTaxAmountApplied, double contractRecordingFee, double contractProcessingFee, boolean wantsToFinance) {
+        super(contractDate, contractCustomerName, getContractCustomerEmail, vehicleSold);
+        this.contractRecordingFee = contractRecordingFee;
+        this.salesTaxAmountApplied = salesTaxAmountApplied;
+        this.contractProcessingFee = contractProcessingFee;
+        this.wantsToFinance = wantsToFinance;
+        this.contractDownPayment = contractDownPayment;
         this.vehicle = vehicle;
-        this.monthlyPayment = getContractMonthlyPayment();
+    }
+
+    public double getContractRecordingFee() {
+        return contractRecordingFee;
     }
 
     public double getContractProcessingFee() {
@@ -49,6 +58,10 @@ public class SalesContract extends Contract {
         return contractLoanTerm;
     }
 
+    public double getSalesTaxAmountApplied() {
+        return salesTaxAmountApplied;
+    }
+
     public double rateForMonthlyPayment(int vin){
         if(vehicle.getPrice() >= 10000){
             return 0.0425;
@@ -62,21 +75,19 @@ public class SalesContract extends Contract {
     public double getContractMonthlyPayment() {
         double monthlyPayment = 0;
         if (wantsToFinance) {
-                    double monthlyRate = rateForMonthlyPayment(super.getVehicleSold())/12;
-                    double vehiclePrice = vehicle.getPrice();
-                    double salesTaxAmountApplied = salesTax * vehiclePrice;
-                    double totalPrice = 0;
+            double monthlyRate = rateForMonthlyPayment(super.getVehicleSold())/12;
+            double vehiclePrice = vehicle.getPrice();
+            double totalPrice = 0;
 
-                    totalPrice = contractRecordingFee + contractProcessingFee + salesTaxAmountApplied + vehiclePrice;
-                    double loanAmount = totalPrice - contractDownPayment;
-                    monthlyPayment = loanAmount * ((monthlyRate * Math.pow(1 + monthlyRate,contractLoanTerm)) / (Math.pow(1 + monthlyRate, contractLoanTerm) - 1));
-                }
+            totalPrice = contractRecordingFee + contractProcessingFee + salesTaxAmountApplied + vehiclePrice;
+            double loanAmount = totalPrice - contractDownPayment;
+            monthlyPayment = loanAmount * ((monthlyRate * Math.pow(1 + monthlyRate,contractLoanTerm)) / (Math.pow(1 + monthlyRate, contractLoanTerm) - 1));
+        }
         return monthlyPayment;
     }
     @Override
     public double getTotalPrice() {
         double vehiclePrice = vehicle.getPrice();
-        double salesTaxAmountApplied = salesTax * vehiclePrice;
         if (vehiclePrice >= 10000) {
             if (!wantsToFinance) {
                 return contractRecordingFee + contractProcessingFee + salesTaxAmountApplied + vehiclePrice;
@@ -107,18 +118,18 @@ public class SalesContract extends Contract {
                 "\nFinancing: " + isWantsToFinance() +
                 "\nProcessing Fee: " + String.format("$%.2f", getContractProcessingFee()) +
                 "\nRecording Fee: " + String.format("$%.2f", contractRecordingFee) +
-                "\nSales Tax: " + salesTax * 100 + "%" +
+                "\nSales Tax: " + salesTaxPercentage * 100 + "%" +
                 "\nDown Payment: " + String.format("$%.2f", getContractDownPayment()) +
                 "\nLoan Amount: " + String.format("$%.2f", getTotalPrice() - getContractDownPayment()) +
                 "\n--------------------------------" +
                 "\nMonthly Payment: " + String.format("$%.2f", getContractMonthlyPayment()) +
                 "\nThe total price: " + String.format("$%.2f", getTotalPrice());
 
-       return output;
+        return output;
     }
     @Override
     public String encodedString(){
-        return "SALE|" + super.getContractDate() + "|" + super.getContractCustomerName() + "|" + super.getGetContractCustomerEmail() + "|" + vehicle.toString() + "|" + vehicle.getPrice() * salesTax + "|" + contractRecordingFee + "|" + String.format("%.2f",getContractProcessingFee()) + "|" + String.format("%.2f",getTotalPrice()) + "|" + isWantsToFinance() + "|" + String.format("%.2f",getContractMonthlyPayment()) + "\n";
+        return "SALE|" + super.getContractDate() + "|" + super.getContractCustomerName() + "|" + super.getGetContractCustomerEmail() + "|" + vehicle.toContractString() + "|" + vehicle.getPrice() * salesTaxPercentage + "|" + contractRecordingFee + "|" + String.format("%.2f",getContractProcessingFee()) + "|" + String.format("%.2f",getTotalPrice()) + "|" + isWantsToFinance() + "|" + String.format("%.2f",getContractMonthlyPayment()) + "\n";
     }
 
 }
