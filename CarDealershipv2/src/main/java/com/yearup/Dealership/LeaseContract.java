@@ -12,24 +12,23 @@ public class LeaseContract extends Contract{
     private double capCost;
     private double residualValue;
     private double financeFee;
-    private Dealership dealership;
-    private Vehicle vehicle;
 
-    public LeaseContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, int vehicleSold, Dealership dealership) {
+
+    public LeaseContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, Vehicle vehicleSold) {
         super(contractDate, contractCustomerName, getContractCustomerEmail, vehicleSold);
-        this.vehicle = dealership.getVehiclesByVin(vehicleSold);
-        this.leaseFee = vehicle.getPrice() * leaseFeeRate;
-        this.residualValue = expectedEndingValue * vehicle.getPrice();
-        this.capCost = vehicle.getPrice();
+        this.leaseFee = vehicleSold.getPrice() * leaseFeeRate;
+        this.residualValue = expectedEndingValue * vehicleSold.getPrice();
+        this.capCost = vehicleSold.getPrice();
         this.depreciation = (capCost - residualValue)/leaseTerm;
         this.financeFee = (capCost + residualValue) * ((interestRate*100)/2400);
     }
-
-    public LeaseContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, int vehicleSold,Vehicle vehicle,double residualValue, double leaseFee) {
+    public LeaseContract(String contractDate, String contractCustomerName, String getContractCustomerEmail, Vehicle vehicleSold,double residualValue, double leaseFee) {
         super(contractDate, contractCustomerName, getContractCustomerEmail, vehicleSold);
         this.leaseFee = leaseFee;
+        this.depreciation = depreciation;
+        this.capCost = capCost;
         this.residualValue = residualValue;
-        this.vehicle = vehicle;
+        this.financeFee = financeFee;
     }
 
     public double getCapCost() {
@@ -54,17 +53,10 @@ public class LeaseContract extends Contract{
         return interestRate;
     }
 
-    public Dealership getDealership() {
-        return dealership;
-    }
-
-    public Vehicle getVehicle() {
-        return vehicle;
-    }
 
     @Override
     public double getContractMonthlyPayment() {
-        return depreciation + financeFee;
+        return getDepreciation() + financeFee;
     }
     @Override
     public double getTotalPrice() {
@@ -72,7 +64,8 @@ public class LeaseContract extends Contract{
     }
     @Override
     public String toString(){
-        String output = "\n-----Contract Information-----" +
+
+        return "\n-----Contract Information-----" +
 
                 "\nCustomer Name: " + getContractCustomerName() +
                 "\nContract Date: " + getContractDate() +
@@ -86,14 +79,11 @@ public class LeaseContract extends Contract{
                 "\n--------------------------------" +
                 "\nMonthly Payment: " + String.format("$%.2f", getContractMonthlyPayment()) +
                 "\nThe total price: " + String.format("$%.2f", getTotalPrice());
-
-        return output;
     }
     @Override
     public String encodedString(){
-        return "Lease|" + super.getContractDate() + "|" + super.getContractCustomerName() + "|" + super.getGetContractCustomerEmail() + "|" + vehicle.toContractString() +
-                "|" + String.format("%.2f",getResidualValue()) + "|" + String.format("%.2f",getLeaseFee()) + "|" + String.format("%.2f",getTotalPrice()) + "|" + String.format("%.2f",getContractMonthlyPayment());
+        return "Lease|" + super.getContractDate() + "|" + super.getContractCustomerName() + "|" + super.getGetContractCustomerEmail() + "|" + super.getVehicleSold().toContractString() +
+                "|" + String.format("%.2f",getResidualValue()) + "|" + String.format("%.2f",getLeaseFee()) + "|" + String.format("%.2f",getTotalPrice()) + "|" + String.format("%.2f",getContractMonthlyPayment()) + "\n";
     }
-
 
 }

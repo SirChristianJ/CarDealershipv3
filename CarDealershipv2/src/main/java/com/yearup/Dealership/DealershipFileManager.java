@@ -17,7 +17,7 @@ public class DealershipFileManager {
 
             while ((input=bfr.readLine()) != null){
                 String[] dataCategory = input.split("\\|");
-                Vehicle v = new Vehicle(Integer.parseInt(dataCategory[0]),
+                Vehicle v = new Vehicle(dataCategory[0],
                                         Integer.parseInt(dataCategory[1]),
                                         dataCategory[2],
                                         dataCategory[3],

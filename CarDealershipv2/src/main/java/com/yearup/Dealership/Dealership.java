@@ -17,9 +17,9 @@ public class Dealership {
         this.inventory = new ArrayList<>();
     }
 
-    public Vehicle getVehiclesByVin(int vin){
+    public Vehicle getVehiclesByVin(String  vin){
         for(Vehicle v: inventory){
-            if(v.getVin() == vin){
+            if(v.getVin().equalsIgnoreCase(vin)){
                 return v;
             }
         }
@@ -103,9 +103,9 @@ public class Dealership {
             e.getMessage();
         }
     }
-    public void removeVehicle(int vinToQuery){
+    public void removeVehicle(String vinToQuery){
         try{
-            inventory.removeIf(vehicle -> vehicle.getVin() == vinToQuery);
+            inventory.removeIf(vehicle -> vehicle.getVin().equalsIgnoreCase(vinToQuery));
             DealershipFileManager.saveDealership(inventory);
         } catch (Exception e) {
             throw new RuntimeException(e);

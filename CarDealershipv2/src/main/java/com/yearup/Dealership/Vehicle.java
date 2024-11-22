@@ -1,7 +1,7 @@
 package com.yearup.Dealership;
 
 public class Vehicle {
-    private int vin;
+    private String vin;
     private int year;
     private String make;
     private String model;
@@ -10,7 +10,7 @@ public class Vehicle {
     private int odometer;
     private double price;
 
-    public Vehicle(int vin, int year, String make, String model, String vehicleType, String color, int odometer, double price) {
+    public Vehicle(String vin, int year, String make, String model, String vehicleType, String color, int odometer, double price) {
         this.vin = vin;
         this.year = year;
         this.make = make;
@@ -21,7 +21,7 @@ public class Vehicle {
         this.price = price;
     }
 
-    public int getVin() {
+    public String getVin() {
         return vin;
     }
     public int getYear() {
@@ -51,13 +51,13 @@ public class Vehicle {
 
     @Override
     public String toString() {
-        return String.format("%d|%d|%s|%s|%s|%s|%d|%.2f\n",vin,year,make,model,vehicleType,color,odometer,price);
+        return String.format("%s|%d|%s|%s|%s|%s|%d|%.2f\n",vin,year,make,model,vehicleType,color,odometer,price);
     }
     public String toEncodedString() {
-        return String.format("%d|%d|%s|%s\n",vin,year,make,model);
+        return String.format("%s|%d|%s|%s\n",vin,year,make,model);
     }
     public String toContractString() {
-        return String.format("%d|%d|%s|%s|%s|%s|%d|%.2f",vin,year,make,model,vehicleType,color,odometer,price);
+        return String.format("%s|%d|%s|%s|%s|%s|%d|%.2f",vin,year,make,model,vehicleType,color,odometer,price);
     }
 
 

@@ -8,30 +8,32 @@ import java.util.InputMismatchException;
 
 public class UserInterface {
     private Dealership dealership;
+    private ArrayList<Contract> contracts = ContractDataManager.initializeContracts();
     UserInterface(){
         this.dealership = DealershipFileManager.getDealership();
     }
-
+    //Display methods
     public void display(){
         do {
-            System.out.println("---------------------------------------------");
-            System.out.println("Welcome to the Object Oriented Dealership!");
-            System.out.println("---------------------------------------------");
-
-            System.out.println("1)Filter by price");
-            System.out.println("2)Filter by make/model");
-            System.out.println("3)Filter by year");
-            System.out.println("4)Filter by color");
-            System.out.println("5)Filter by mileage");
-            System.out.println("6)Filter by vehicle type");
-            System.out.println("7)View all vehicles");
-            System.out.println("8)Add vehicle");
-            System.out.println("9)Remove vehicle");
-            System.out.println("10)SELL/LEASE Vehicle");
-
-            System.out.println("99)Exit");
-
-            System.out.println("\n");
+            String menuString = """
+                   | ---------------------------------------------|
+                   |                                              |
+                   |   Welcome to the Object Oriented Dealership! |
+                   |                                              |
+                   |______________________________________________|
+                          1)Filter by price
+                          2)Filter by make/model
+                          3)Filter by year
+                          4)Filter by color
+                          5)Filter by mileage
+                          6)Filter by vehicle type
+                          7)View all vehicles
+                          8)Add vehicle
+                          9)Remove vehicle
+                          10)SELL/LEASE Vehicle
+                          99)Exit
+                   \s""";
+            System.out.println(menuString);
 
             try {
                 short choice = Console.PromptForShort("Enter a selection: ");
@@ -98,7 +100,6 @@ public class UserInterface {
 
         }while (true);
     }
-
     public void displayInventoryByVinYearMakeModel(ArrayList<Vehicle> inventory){
         System.out.printf("%5s|%5s|%5s|%5s\n","vin","year","make","model");
         System.out.println("-----------------------------------------------");
@@ -118,18 +119,21 @@ public class UserInterface {
         System.out.println("-------------------------------------------------------");
         System.out.println(v.toString());
     }
+
+    //removing vehicle from inventory via UI
     public void promptForRemovingVehicle(){
-        int vinToRemove = Console.PromptForInt("Add a vin: ");
+        String vinToRemove = Console.PromptForString("Add a vin: ");
         dealership.removeVehicle(vinToRemove);
     }
 
+    //adding vehicle methods
     public void addVehicle(){
 
         Vehicle newVehicle = promptForAddingVehicle();
         dealership.addVehicle(newVehicle);
     }
     public Vehicle promptForAddingVehicle(){
-        int vinToAdd = Console.PromptForInt("Add a vin: ");
+        String vinToAdd = Console.PromptForString("Add a vin: ");
         int yearToAdd = Console.PromptForInt("Add a year: ");
         String makeToAdd = Console.PromptForString("Add a make: ");
         String modelToAdd = Console.PromptForString("Add a model: ");
@@ -137,56 +141,59 @@ public class UserInterface {
         String colorToAdd = Console.PromptForString("What color is this vehicle: ");
         int odometerToAdd = Console.PromptForInt("Add odometer: ");
         double priceToAdd = Console.PromptForDouble("Add price: ");
-        Vehicle vehicleToAdd = new Vehicle(vinToAdd,yearToAdd,makeToAdd,modelToAdd,vehicleTypeToAdd,colorToAdd,odometerToAdd,priceToAdd);
 
-        return vehicleToAdd;
+        return new Vehicle(vinToAdd,yearToAdd,makeToAdd,modelToAdd,vehicleTypeToAdd,colorToAdd,odometerToAdd,priceToAdd);
     }
 
-    public void displaySalesContractInfo(SalesContract salesContract){
-        System.out.println(salesContract);
-    }
-    public void displayLeaseContractInfo(LeaseContract leaseContract){
-        System.out.println(leaseContract);
+    //contract related methods
+    public String promptForPurchasingVehicle(){
+        do{
+            System.out.println("---------------------------------------------");
+            System.out.println("Welcome to the Object Oriented Dealership!");
+            System.out.println("---------------------------------------------");
+            displayInventoryByVinYearMakeModel(dealership.getAllVehicles());
+            String vehicleChoice = Console.PromptForString("Enter the vin of the vehicle you wish to purchase: ");
+            try {
+                displaySingleVehicleInfo(dealership.getVehiclesByVin(vehicleChoice));
+                boolean isConfirmedVehicle = Console.PromptForYesNo("Is this the vehicle you wish to purchase?");
+                if(isConfirmedVehicle) {
+                    return vehicleChoice;
+                }
+            } catch (Exception e) {
+                System.out.println("This vin is either not available or does not exist. Please Try again.");
+            }
+
+        }while (true);
     }
     public void processSellOrLeaseVehicle(){
-        //do the stuff here...
-        int[] options = promptForPurchasingVehicle();
-        int userChoice = options[0];
-        int queryVin = options[1];
+        int userChoice = Console.PromptForInt("\nIs this a Sale or a lease?\n  1)Sale\n  2)Lease\nPlease select one of the following options:");
+        String vehicleVin = promptForPurchasingVehicle();
+
         if(userChoice == 1){
-            displaySalesContractInfo(initializeSalesContract(queryVin));
+            displaySalesContractInfo(initializeSalesContract(vehicleVin));
         } else if (userChoice == 2) {
-            displayLeaseContractInfo(initializeLeaseContract(queryVin));
+            displayLeaseContractInfo(initializeLeaseContract(vehicleVin));
         }
     }
-    public int[] promptForPurchasingVehicle(){
-        System.out.println("---------------------------------------------");
-        System.out.println("Welcome to the Object Oriented Dealership!");
-        System.out.println("---------------------------------------------");
-        displayInventoryByVinYearMakeModel(dealership.getAllVehicles());
-        int vehicleChoice = Console.PromptForInt("Enter the vin of the vehicle you wish to purchase: ");
-        displaySingleVehicleInfo(dealership.getVehiclesByVin(vehicleChoice));
-        int userChoice = Console.PromptForInt("\nIs this a Sale or a lease?\n  1)Sale\n  2)Lease\nPlease select one of the following options:");
-
-        return new int[]{userChoice, vehicleChoice};
-    }
-    public SalesContract initializeSalesContract(int vin){
+    public SalesContract initializeSalesContract(String vin){
         LocalDateTime currentDate = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String contractDate = currentDate.format(formatter);
         String customerName = Console.PromptForString("Please enter your name: ");
         String customerEmail = Console.PromptForString("Please enter your email: ");
         boolean isFinancing = Console.PromptForYesNo("Would you like to finance? ");
-        boolean isDownpayment = Console.PromptForYesNo("Would you like to make a down payment?");
+        /*boolean isDownpayment = Console.PromptForYesNo("Would you like to make a down payment?");
         double downpayment = 0;
         if(isDownpayment)
-            downpayment = Console.PromptForDouble("Enter down payment amount: ");
-        SalesContract salesContract = new SalesContract(contractDate,customerName,customerEmail,vin,isFinancing,downpayment,dealership);
-        ContractDataManager.addContract(salesContract);
-        ContractDataManager.saveContracts();
+            downpayment = Console.PromptForDouble("Enter down payment amount: ");*/
+        SalesContract salesContract = new SalesContract(contractDate,customerName,customerEmail,dealership.getVehiclesByVin(vin),isFinancing);
+        contracts.add(salesContract);
+        ContractDataManager.appendContracts(salesContract);
+        //ContractDataManager.saveContracts(contracts);
+        dealership.removeVehicle(vin);
         return salesContract;
     }
-    public LeaseContract initializeLeaseContract(int vin){
+    public LeaseContract initializeLeaseContract(String vin){
         LocalDateTime currentDate = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String contractDate = currentDate.format(formatter);
@@ -197,9 +204,18 @@ public class UserInterface {
         double downpayment = 0;
         if(isDownpayment)
             downpayment = Console.PromptForDouble("Enter down payment amount: ");*/
-        LeaseContract leaseContract = new LeaseContract(contractDate,customerName,customerEmail,vin, dealership);
-        ContractDataManager.addContract(leaseContract);
-        ContractDataManager.saveContracts();
+        LeaseContract leaseContract = new LeaseContract(contractDate,customerName,customerEmail,dealership.getVehiclesByVin(vin));
+        contracts.add(leaseContract);
+        ContractDataManager.appendContracts(leaseContract);
+        //ContractDataManager.saveContracts(contracts);
+
+        dealership.removeVehicle(vin);
         return leaseContract;
+    }
+    public void displaySalesContractInfo(SalesContract salesContract){
+        System.out.println(salesContract);
+    }
+    public void displayLeaseContractInfo(LeaseContract leaseContract){
+        System.out.println(leaseContract);
     }
 }
