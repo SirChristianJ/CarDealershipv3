@@ -1,46 +1,78 @@
 package com.yearup.Dealership;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DealershipFileManager {
-    static final String datafile = "vehicles.csv";
-    private static Dealership dealership = getDealership();
+    static final String datafile_vehicles = "vehicles.csv";
+    static final String datafile_dealerships = "dealerships.csv";
+    private static List<Dealership> dealerships = getDealerships();
+    private static Dealership dealership;
 
-    public static Dealership getDealership(){
-        Dealership test;
-        ArrayList<Vehicle> inventory = new ArrayList<>();
-        try{
-            BufferedReader bfr = new BufferedReader(new FileReader(datafile));
+    public static List<Dealership> getDealerships(){
+        List<Dealership> test = new ArrayList<>();
+
+        try {
+            BufferedReader bfr = new BufferedReader(new FileReader(datafile_dealerships));
             String input;
-            String[] dealerInfo = bfr.readLine().split("\\|");
-
-            while ((input=bfr.readLine()) != null){
+            bfr.readLine();
+            while ((input = bfr.readLine())!=null){
                 String[] dataCategory = input.split("\\|");
-                Vehicle v = new Vehicle(dataCategory[0],
-                                        Integer.parseInt(dataCategory[1]),
-                                        dataCategory[2],
-                                        dataCategory[3],
-                                        dataCategory[4],
-                                        dataCategory[5],
-                                        Integer.parseInt(dataCategory[6]),
-                                        Double.parseDouble(dataCategory[7])
-                                        );
-                inventory.add(v);
+                Dealership d = new Dealership(dataCategory[0],dataCategory[1],dataCategory[2]);
+                test.add(d);
             }
+        }
+        catch (IOException e) {
+            throw new RuntimeException("File not found!");
+        }
 
-            test = new Dealership(dealerInfo[0],dealerInfo[1],dealerInfo[2]);
-            test.setInventory(inventory);
+        return test;
+    }
 
+    public static Dealership getDealership(String dealershipName){
+        ArrayList<Vehicle> inventory = new ArrayList<>();
+
+        try{
+            do {
+                if (dealerships.stream().anyMatch(dealership -> dealership.getName().equalsIgnoreCase(dealershipName))) {
+                    String dealerName = dealershipName + "/";
+                    BufferedReader bfr = new BufferedReader(new FileReader(dealerName + datafile_vehicles));
+                    String input;
+                    bfr.readLine();
+                    while ((input = bfr.readLine()) != null) {
+                        String[] dataCategory = input.split("\\|");
+                        Vehicle v = new Vehicle(dataCategory[0],
+                                Integer.parseInt(dataCategory[1]),
+                                dataCategory[2],
+                                dataCategory[3],
+                                dataCategory[4],
+                                dataCategory[5],
+                                Integer.parseInt(dataCategory[6]),
+                                Double.parseDouble(dataCategory[7])
+                        );
+                        inventory.add(v);
+                    }
+
+                    dealership = new Dealership(dealershipName);
+                    dealership.setInventory(inventory);
+
+                    return dealership;
+                }
+            }while (true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
-        return test;
     }
     public static void saveDealership(ArrayList<Vehicle> inventory){
         try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(datafile));
+            String dealerName = dealership.getName() + "/";
+            Path path = Paths.get(dealerName);
+            Files.createDirectories(path);
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(dealerName + datafile_vehicles));
             bufferedWriter.write(dealership.toString());
             for (Vehicle v : inventory) {
                 String data = v.toString();

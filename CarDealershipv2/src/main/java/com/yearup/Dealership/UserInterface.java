@@ -5,12 +5,18 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 
 public class UserInterface {
     private Dealership dealership;
     private ArrayList<Contract> contracts = ContractDataManager.initializeContracts();
+
     UserInterface(){
-        this.dealership = DealershipFileManager.getDealership();
+        System.out.println("Here's a list of dealerships!");
+        DealershipFileManager.getDealerships().forEach(dealer -> System.out.println(dealer.getName() + " " +
+                                                        dealer.getAddress() + " " + dealer.getPhone()));
+        String dealerName = Console.PromptForString("Enter the name of the dealership:");
+        this.dealership = DealershipFileManager.getDealership(dealerName);
     }
     //Display methods
     public void display(){

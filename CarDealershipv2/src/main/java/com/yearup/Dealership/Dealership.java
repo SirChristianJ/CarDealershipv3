@@ -10,6 +10,12 @@ public class Dealership {
     private String phone;
     private ArrayList<Vehicle> inventory;
 
+    public Dealership(String name){
+        this.name = name;
+        this.address = "";
+        this.phone = "";
+        this.inventory = null;
+    }
     public Dealership(String name, String address, String phone) {
         this.name = name;
         this.address = address;
@@ -110,6 +116,18 @@ public class Dealership {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getAddress() {
+        return address;
     }
 
     @Override
