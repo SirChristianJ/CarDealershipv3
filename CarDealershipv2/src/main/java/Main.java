@@ -1,10 +1,9 @@
-package com.yearup.Dealership;
-
-import java.util.ArrayList;
+import Interface.UserInterface;
 
 public class Main {
     public static void main(String[] args) {
         UserInterface ui = new UserInterface();
+        ui.passArgs(args);
         ui.display();
     }
 }

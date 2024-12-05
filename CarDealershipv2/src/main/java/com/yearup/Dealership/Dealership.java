@@ -1,14 +1,18 @@
 package com.yearup.Dealership;
 
+import DataManager.VehicleDoa;
+
 import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
 public class Dealership {
+    private int id;
     private String name;
     private String address;
     private String phone;
     private ArrayList<Vehicle> inventory;
+    private VehicleDoa doa;
 
     public Dealership(String name){
         this.name = name;
@@ -16,7 +20,8 @@ public class Dealership {
         this.phone = "";
         this.inventory = null;
     }
-    public Dealership(String name, String address, String phone) {
+    public Dealership(int id, String name, String address, String phone) {
+        this.id =id;
         this.name = name;
         this.address = address;
         this.phone = phone;
@@ -99,7 +104,7 @@ public class Dealership {
     public void setInventory(ArrayList<Vehicle> inventory){
         this.inventory = inventory;
     }
-    public void addVehicle(Vehicle v){
+    /*public void addVehicle(Vehicle v){
         try{
             this.inventory.add(v);
             DealershipFileManager.saveDealership(inventory);
@@ -116,6 +121,10 @@ public class Dealership {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }*/
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -132,6 +141,6 @@ public class Dealership {
 
     @Override
     public String toString(){
-        return String.format("%s|%s|%s\n", name,address,phone);
+        return String.format("%d %-10s %-10s %-10s\n", id,name,address,phone);
     }
 }

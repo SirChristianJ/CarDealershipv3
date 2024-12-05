@@ -1,45 +1,52 @@
-package com.yearup.Dealership;
+package Interface;
 
-import javax.crypto.Cipher;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import DataManager.VehicleDoa;
+import com.yearup.Dealership.*;
+
 import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
 
-public class UserInterface {
-    private Dealership dealership;
+public class UserInterface implements IConnect {
+    private int dealership_id = 0;
     private ArrayList<Contract> contracts = ContractDataManager.initializeContracts();
+    private static VehicleDoa vehicleDoa;
 
-    UserInterface(){
+    public void passArgs(String[] args){
+        vehicleDoa = new VehicleDoa(connectDB(args));
         System.out.println("Here's a list of dealerships!");
-        DealershipFileManager.getDealerships().forEach(dealer -> System.out.println(dealer.getName() + " " +
-                                                        dealer.getAddress() + " " + dealer.getPhone()));
-        String dealerName = Console.PromptForString("Enter the name of the dealership:");
-        this.dealership = DealershipFileManager.getDealership(dealerName);
+        vehicleDoa.getDealershipsAll().forEach(System.out::println);
+
+        dealership_id = Console.PromptForInt("Enter the id of the dealership:");
     }
     //Display methods
-    public void display(){
+    public void display() {
         do {
             String menuString = """
-                   | ---------------------------------------------|
-                   |                                              |
-                   |   Welcome to the Object Oriented Dealership! |
-                   |                                              |
-                   |______________________________________________|
-                          1)Filter by price
-                          2)Filter by make/model
-                          3)Filter by year
-                          4)Filter by color
-                          5)Filter by mileage
-                          6)Filter by vehicle type
-                          7)View all vehicles
-                          8)Add vehicle
-                          9)Remove vehicle
-                          10)SELL/LEASE Vehicle
-                          99)Exit
-                   \s""";
-            System.out.println(menuString);
+                     -------------------------------------------------------
+                    
+                           Welcome to the Object Oriented Dealership!
+                       Current Dealership:
+                       %s
+                    ________________________________________________________
+                           1)Filter by price
+                           2)Filter by make/model
+                           3)Filter by year
+                           4)Filter by color
+                           5)Filter by mileage
+                           6)Filter by vehicle type
+                           7)View all vehicles
+                           8)Add vehicle
+                           9)Remove vehicle
+                           10)SELL/LEASE Vehicle
+                           99)Exit
+                    \s""";
+
+            String name = "";
+            for (Dealership dealership : vehicleDoa.getDealershipsAll()) {
+                if (vehicleDoa.getDealershipsAll().stream().anyMatch(dealershipid -> dealership.getId() == dealership_id)) {
+                    name = dealership.getName().trim();
+                }
+            }
+            System.out.printf(menuString,name);
 
             try {
                 short choice = Console.PromptForShort("Enter a selection: ");
@@ -47,48 +54,48 @@ public class UserInterface {
                     case 1 -> {
                         int minRange = Console.PromptForInt("Enter a min range:");
                         int maxRange = Console.PromptForInt("Enter a max range: ");
-                        displayFilteredInventory(dealership.getVehiclesByPrice(minRange, maxRange));
+                        vehicleDoa.getVehiclesByPriceRange(dealership_id,minRange,maxRange).forEach(System.out::println);
                     }
 
                     case 2 -> {
                         String makeRange = Console.PromptForString("Enter a make:");
                         String modelRange = Console.PromptForString("Enter a model: ");
-                        displayFilteredInventory(dealership.getVehiclesByMakeModel(makeRange, modelRange));
+                        vehicleDoa.getVehiclesByMake(dealership_id,makeRange,modelRange).forEach(System.out::println);
                     }
 
                     case 3 -> {
                         int minYearRange = Console.PromptForInt("Enter a min year: ");
                         int maxYearRange = Console.PromptForInt("Enter a max year: ");
-                        displayFilteredInventory(dealership.getVehiclesByYear(minYearRange, maxYearRange));
+                        vehicleDoa.getVehiclesByYear(dealership_id,minYearRange,maxYearRange).forEach(System.out::println);
                     }
 
                     case 4 -> {
                         String colorRange = Console.PromptForString("Enter a color: ");
-                        displayFilteredInventory(dealership.getVehiclesByColor(colorRange));
+                        vehicleDoa.getVehiclesByColor(dealership_id,colorRange).forEach(System.out::println);
                     }
 
                     case 5 -> {
                         int minMileageRange = Console.PromptForInt("Enter a min mileage: ");
                         int maxMileageRange = Console.PromptForInt("Enter a max mileage: ");
-                        displayFilteredInventory(dealership.getVehiclesByMileage(minMileageRange, maxMileageRange));
+                        vehicleDoa.getVehiclesByMilage(dealership_id,minMileageRange,maxMileageRange).forEach(System.out::println);
                     }
 
                     case 6 -> {
                         String vehicleTypeQuery = Console.PromptForString("Enter a vehicle type: ");
-                        displayFilteredInventory(dealership.getVehiclesByType(vehicleTypeQuery));
+                        vehicleDoa.getVehiclesByType(dealership_id,vehicleTypeQuery).forEach(System.out::println);
                     }
 
                     case 7 -> {
-                        displayInventoryByVinYearMakeModel(dealership.getAllVehicles());
+                        vehicleDoa.getVehiclesAll(dealership_id).forEach(System.out::println);
                     }
 
                     case 8 -> {
-                        addVehicle();
+                        promptForAddingVehicle();
                     }
-
+/*
                     case 9 -> {promptForRemovingVehicle();}
 
-                    case 10 -> {processSellOrLeaseVehicle();}
+                    case 10 -> {processSellOrLeaseVehicle();}*/
 
                     case 99 -> {
                         System.out.println("Exiting ...");
@@ -99,14 +106,55 @@ public class UserInterface {
                         System.out.println("Please enter one of the available selections!\n");
                     }
                 }
-            } catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 System.out.println("Enter a numerical number!");
             }
             String keyPress = Console.PromptForString("\nPress any key to return to previous menu: ");
 
-        }while (true);
+        } while (true);
     }
-    public void displayInventoryByVinYearMakeModel(ArrayList<Vehicle> inventory){
+
+    //adding vehicle methods
+    public void promptForAddingVehicle(){
+        String vinToAdd = Console.PromptForString("Add a vin: ");
+        int yearToAdd = Console.PromptForInt("Add a year: ");
+        String makeToAdd = Console.PromptForString("Add a make: ");
+        String modelToAdd = Console.PromptForString("Add a model: ");
+        String vehicleTypeToAdd = Console.PromptForString("What type of vehicle is this (truck,suv,van,etc): ");
+        String colorToAdd = Console.PromptForString("What color is this vehicle: ");
+        int odometerToAdd = Console.PromptForInt("Add odometer: ");
+        double priceToAdd = Console.PromptForDouble("Add price: ");
+
+        vehicleDoa.addVehicleToDealership(dealership_id,new Vehicle(vinToAdd,
+                                                        yearToAdd,
+                                                        makeToAdd,
+                                                        modelToAdd,
+                                                        vehicleTypeToAdd,
+                                                        colorToAdd,
+                                                        odometerToAdd,
+                                                        priceToAdd)
+        );
+    }
+
+    /*@Override
+    public BasicDataSource connectDB(String[] args) {
+        String username = args[0];
+        String password = args[1];
+        // Create the datasource
+        BasicDataSource dataSource = new BasicDataSource();
+        // Configure the datasource
+        dataSource.setUrl("jdbc:mysql://localhost:3306/sakila");
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
+        vehicleDoa = new VehicleDoa(dataSource);
+        System.out.println("Here's a list of dealerships!");
+        vehicleDoa.getDealershipsAll().forEach(System.out::println);
+
+        dealership_id = Console.PromptForInt("Enter the id of the dealership:");
+        return dataSource;
+    }*/
+}
+ /*   public void displayInventory(List<Vehicle> inventory){
         System.out.printf("%5s|%5s|%5s|%5s\n","vin","year","make","model");
         System.out.println("-----------------------------------------------");
         for (Vehicle v: inventory){
@@ -124,7 +172,7 @@ public class UserInterface {
         System.out.printf("%5s|%5s|%5s|%5s|%5s|%5s|%5s|%5s\n","vin","year","make","model","vehicle-type","color","odometer","price");
         System.out.println("-------------------------------------------------------");
         System.out.println(v.toString());
-    }
+
 
     //removing vehicle from inventory via UI
     public void promptForRemovingVehicle(){
@@ -132,24 +180,6 @@ public class UserInterface {
         dealership.removeVehicle(vinToRemove);
     }
 
-    //adding vehicle methods
-    public void addVehicle(){
-
-        Vehicle newVehicle = promptForAddingVehicle();
-        dealership.addVehicle(newVehicle);
-    }
-    public Vehicle promptForAddingVehicle(){
-        String vinToAdd = Console.PromptForString("Add a vin: ");
-        int yearToAdd = Console.PromptForInt("Add a year: ");
-        String makeToAdd = Console.PromptForString("Add a make: ");
-        String modelToAdd = Console.PromptForString("Add a model: ");
-        String vehicleTypeToAdd = Console.PromptForString("What type of vehicle is this (truck,suv,van,etc): ");
-        String colorToAdd = Console.PromptForString("What color is this vehicle: ");
-        int odometerToAdd = Console.PromptForInt("Add odometer: ");
-        double priceToAdd = Console.PromptForDouble("Add price: ");
-
-        return new Vehicle(vinToAdd,yearToAdd,makeToAdd,modelToAdd,vehicleTypeToAdd,colorToAdd,odometerToAdd,priceToAdd);
-    }
 
     //contract related methods
     public String promptForPurchasingVehicle(){
@@ -181,6 +211,8 @@ public class UserInterface {
             displayLeaseContractInfo(initializeLeaseContract(vehicleVin));
         }
     }
+
+
     public SalesContract initializeSalesContract(String vin){
         LocalDateTime currentDate = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -188,10 +220,13 @@ public class UserInterface {
         String customerName = Console.PromptForString("Please enter your name: ");
         String customerEmail = Console.PromptForString("Please enter your email: ");
         boolean isFinancing = Console.PromptForYesNo("Would you like to finance? ");
-        /*boolean isDownpayment = Console.PromptForYesNo("Would you like to make a down payment?");
+
+
+boolean isDownpayment = Console.PromptForYesNo("Would you like to make a down payment?");
         double downpayment = 0;
         if(isDownpayment)
-            downpayment = Console.PromptForDouble("Enter down payment amount: ");*/
+            downpayment = Console.PromptForDouble("Enter down payment amount: ");
+
         SalesContract salesContract = new SalesContract(contractDate,customerName,customerEmail,dealership.getVehiclesByVin(vin),isFinancing);
         contracts.add(salesContract);
         ContractDataManager.appendContracts(salesContract);
@@ -205,11 +240,14 @@ public class UserInterface {
         String contractDate = currentDate.format(formatter);
         String customerName = Console.PromptForString("Please enter your name: ");
         String customerEmail = Console.PromptForString("Please enter your email: ");
-        /*boolean isFinancing = Console.PromptForYesNo("Would you like to finance? ");
+
+
+boolean isFinancing = Console.PromptForYesNo("Would you like to finance? ");
         boolean isDownpayment = Console.PromptForYesNo("Would you like to make a down payment?");
         double downpayment = 0;
         if(isDownpayment)
-            downpayment = Console.PromptForDouble("Enter down payment amount: ");*/
+            downpayment = Console.PromptForDouble("Enter down payment amount: ");
+
         LeaseContract leaseContract = new LeaseContract(contractDate,customerName,customerEmail,dealership.getVehiclesByVin(vin));
         contracts.add(leaseContract);
         ContractDataManager.appendContracts(leaseContract);
@@ -225,3 +263,4 @@ public class UserInterface {
         System.out.println(leaseContract);
     }
 }
+*/
